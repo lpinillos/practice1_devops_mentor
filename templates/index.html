@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calculadora IMC & Calorías</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap"
+    rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0d0d0f;
+      --surface: #16161a;
+      --border: #2a2a30;
+      --accent: #c8f135;
+      --accent2: #6ef0c0;
+      --text: #f0f0f0;
+      --muted: #888;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 70% 20%, rgba(200, 241, 53, 0.07) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 40% at 20% 80%, rgba(110, 240, 192, 0.05) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 520px;
+      position: relative;
+    }
+
+    header {
+      margin-bottom: 2.5rem;
+    }
+
+    .badge {
+      display: inline-block;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      border: 1px solid rgba(200, 241, 53, 0.3);
+      padding: 0.3rem 0.8rem;
+      border-radius: 100px;
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: 2.4rem;
+      font-weight: 800;
+      line-height: 1.1;
+      color: var(--text);
+    }
+
+    h1 span {
+      color: var(--accent);
+    }
+
+    .subtitle {
+      margin-top: 0.6rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+      font-weight: 300;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2rem;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      margin-bottom: 1rem;
+    }
+
+    label {
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    input,
+    select {
+      background: #1e1e24;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      transition: border-color 0.2s;
+      outline: none;
+      width: 100%;
+      -webkit-appearance: none;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(200, 241, 53, 0.08);
+    }
+
+    select option {
+      background: #1e1e24;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 0.5rem;
+      padding: 0.85rem;
+      background: var(--accent);
+      color: #0d0d0f;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: 0.04em;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    .error {
+      margin-top: 1rem;
+      padding: 0.75rem 1rem;
+      background: rgba(255, 80, 80, 0.1);
+      border: 1px solid rgba(255, 80, 80, 0.25);
+      border-radius: 10px;
+      color: #ff8080;
+      font-size: 0.85rem;
+    }
+
+    .resultado {
+      margin-top: 1.5rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .stat {
+      background: #1e1e24;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.2rem;
+    }
+
+    .stat.full {
+      grid-column: span 2;
+    }
+
+    .stat.highlight {
+      border-color: rgba(200, 241, 53, 0.3);
+      background: rgba(200, 241, 53, 0.05);
+    }
+
+    .stat-label {
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.4rem;
+    }
+
+    .stat-value {
+      font-family: 'Syne', sans-serif;
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--accent);
+      line-height: 1;
+    }
+
+    .stat-value.green {
+      color: var(--accent2);
+    }
+
+    .stat-sub {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 0.3rem;
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 1.5rem 0;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 2rem;
+      font-size: 0.75rem;
+      color: #444;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <header>
+      <div class="badge">Calculadora de Salud</div>
+      <h1>IMC &amp; <span>Calorías</span></h1>
+      <p class="subtitle">Conoce tu índice de masa corporal y tus calorías de mantenimiento diarias.</p>
+    </header>
+
+    <div class="card">
+      <form method="POST">
+        <div class="grid-2">
+          <div class="field">
+            <label>Peso (kg)</label>
+            <input type="number" name="peso" placeholder="70" step="0.1" min="1" required
+              value="{{ request.form.get('peso', '') }}" />
+          </div>
+          <div class="field">
+            <label>Altura (cm)</label>
+            <input type="number" name="altura" placeholder="175" step="0.1" min="1" required
+              value="{{ request.form.get('altura', '') }}" />
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="field">
+            <label>Edad (años)</label>
+            <input type="number" name="edad" placeholder="25" min="1" max="120" required
+              value="{{ request.form.get('edad', '') }}" />
+          </div>
+          <div class="field">
+            <label>Sexo biológico</label>
+            <select name="sexo">
+              <option value="masculino">Masculino</option>
+              <option value="femenino">Femenino</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Nivel de actividad</label>
+          <select name="actividad">
+            <option value="sedentario">Sedentario (poco o nada de ejercicio)</option>
+            <option value="ligero">Ligero (1–3 días/semana)</option>
+            <option value="moderado" selected>Moderado (3–5 días/semana)</option>
+            <option value="activo">Activo (6–7 días/semana)</option>
+            <option value="muy_activo">Muy activo (2x al día)</option>
+          </select>
+        </div>
+
+        <button type="submit">Calcular →</button>
+
+        {% if error %}
+        <div class="error">⚠️ {{ error }}</div>
+        {% endif %}
+      </form>
+
+      {% if resultado %}
+      <div class="divider"></div>
+      <div class="resultado">
+        <div class="stat highlight">
+          <div class="stat-label">Índice de Masa Corporal</div>
+          <div class="stat-value">{{ resultado.imc }}</div>
+          <div class="stat-sub">{{ resultado.emoji }} {{ resultado.categoria }}</div>
+        </div>
+        <div class="stat highlight">
+          <div class="stat-label">Calorías de Mantenimiento</div>
+          <div class="stat-value green">{{ resultado.calorias }}</div>
+          <div class="stat-sub">kcal / día</div>
+        </div>
+        <div class="stat full">
+          <div class="stat-label">Tasa Metabólica Basal (TMB)</div>
+          <div class="stat-value" style="font-size:1.4rem; color: var(--muted)">{{ resultado.tmb }} kcal</div>
+          <div class="stat-sub">Calorías que quemas en reposo total (fórmula Mifflin-St Jeor)</div>
+        </div>
+      </div>
+      {% endif %}
+      <div class="divider"></div>
+
+      <!-- Upload de imagen a Blob Storage -->
+      <div style="margin-top:0.5rem">
+        <div class="badge" style="margin-bottom:1rem">Subir imagen</div>
+        <div class="field">
+          <label>Seleccionar imagen (png, jpg, webp…)</label>
+          <input type="file" id="imgInput" accept="image/*" style="cursor:pointer" />
+        </div>
+        <button type="button" onclick="subirImagen()">Subir imagen →</button>
+        <div id="uploadMsg" style="margin-top:0.8rem; font-size:0.85rem; color:var(--accent2)"></div>
+      </div>
+
+      <script>
+        async function subirImagen() {
+          const input = document.getElementById('imgInput');
+          const msg = document.getElementById('uploadMsg');
+          if (!input.files.length) { msg.textContent = '⚠️ Selecciona una imagen primero.'; return; }
+          const fd = new FormData();
+          fd.append('imagen', input.files[0]);
+          msg.textContent = 'Subiendo…';
+          try {
+            const res = await fetch('/upload', { method: 'POST', body: fd });
+            const data = await res.json();
+            msg.textContent = data.mensaje
+              ? `✅ ${data.mensaje} — Blob: ${data.blob}`
+              : `❌ ${data.error}`;
+          } catch (e) { msg.textContent = '❌ Error de red: ' + e.message; }
+        }
+      </script>
+    </div>
+
+    <footer></footer>
+  </div>
+</body>
+
+</html>

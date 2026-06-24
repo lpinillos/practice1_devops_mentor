@@ -1,0 +1,8 @@
+project_name        = "devopsmentor"
+location            = "East US"
+vm_size             = "Standard_B1s"
+admin_username      = "azureuser"
+ssh_public_key_path = "~/.ssh/id_rsa.pub"
+repo_url            = "https://github.com/tu-usuario/tu-repositorio.git"
+app_port            = 5000
+blob_container_name = "imagenes"
