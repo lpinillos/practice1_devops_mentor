@@ -1,0 +1,58 @@
+trigger:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  workingDir: '$(System.DefaultWorkingDirectory)/terraform'
+  serviceConnection: 'sc-azure-terraform'
+
+steps:
+  - task: TerraformInstaller@1
+    displayName: 'Instalar Terraform'
+    inputs:
+      terraformVersion: 'latest'
+
+  - script: |
+      mkdir -p $(Agent.TempDirectory)/ssh
+      ssh-keygen -t rsa -b 4096 -f $(Agent.TempDirectory)/ssh/id_rsa -N "" -q
+      echo "Llave generada en $(Agent.TempDirectory)/ssh/id_rsa.pub"
+    displayName: 'Generar llave SSH'
+
+  - task: TerraformTaskV4@4
+    displayName: 'Terraform Init'
+    inputs:
+      provider: 'azurerm'
+      command: 'init'
+      workingDirectory: '$(workingDir)'
+
+  - task: TerraformTaskV4@4
+    displayName: 'Terraform Validate'
+    inputs:
+      provider: 'azurerm'
+      command: 'validate'
+      workingDirectory: '$(workingDir)'
+
+  - task: TerraformTaskV4@4
+    displayName: 'Terraform Plan'
+    inputs:
+      provider: 'azurerm'
+      command: 'plan'
+      workingDirectory: '$(workingDir)'
+      environmentServiceNameAzureRM: '$(serviceConnection)'
+      commandOptions: >-
+        -var="repo_url=https://github.com/lpinillos/practice1_devops_mentor.git"
+        -var="ssh_public_key_path=$(Agent.TempDirectory)/ssh/id_rsa.pub"
+        -out=tfplan
+
+  - task: TerraformTaskV4@4
+    displayName: 'Terraform Apply'
+    inputs:
+      provider: 'azurerm'
+      command: 'apply'
+      workingDirectory: '$(workingDir)'
+      environmentServiceNameAzureRM: '$(serviceConnection)'
+      commandOptions: 'tfplan'
