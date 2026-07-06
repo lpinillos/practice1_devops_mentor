@@ -7,13 +7,13 @@ variable "project_name" {
 variable "location" {
   type        = string
   description = "Region de Azure donde se crean los recursos."
-  default     = "East US"
+  default     = "Central US"
 }
 
 variable "vm_size" {
   type        = string
   description = "Tamano (SKU) de la maquina virtual."
-  default     = "Standard_B1s"
+  default     = "Standard_D2s_v3"
 }
 
 variable "admin_username" {
